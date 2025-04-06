@@ -35,7 +35,29 @@ git clone https://github.com/motii8128/l476-rs.git
 ```
 cd l476-rs
 ```
-ビルド（コンパイル）する
+ビルドする
 ```
 cargo build --release
+```
+これでマイコンに書き込むバイナリが生成されているので確認する。
+
+ここでは何も変更していなければ以下のフォルダ内に「l476-rs」という名前で生成される。
+
+ここで「thumbv7em-none-eabihf」とは今回のターゲットCPU（Cortex-M4F）に対するライブラリ名である
+```
+target/thumbv7em-none-eabihf/release
+```
+
+スクリプト（必要な操作をすべてまとめたもの）に権限を付与する
+```
+chmod +x ./load.sh
+```
+スクリプトを実行してマイコンにコードを書き込む
+スクリプトの引数としてバイナリの場所を入力する必要がある
+```
+./load.sh [バイナリの場所]
+```
+今回だとこんな感じ
+```
+./load.sh target/thumbv7em-none-eabihf/release/l476-rs
 ```
