@@ -165,10 +165,12 @@ checksum = "1d758ba1b47b00caf47f24925c0074ecb20d6dfcffe7f6d53395c0465674841a"
 name = "l476-rs"
 version = "0.1.0"
 dependencies = [
+ "bxcan",
  "cortex-m",
  "cortex-m-rt",
  "cortex-m-semihosting",
  "embedded-alloc",
+ "nb 1.1.0",
  "panic-halt",
  "panic-itm",
  "stm32l4xx-hal",
