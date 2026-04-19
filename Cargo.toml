@@ -12,8 +12,6 @@ cortex-m-semihosting = "0.5"
 nb = "1"
 panic-halt = "1.0.0"
 stm32l4xx-hal = { version = "0.7", features = ["stm32l476", "rt"] }
-panic-itm = "0.4.1"
-embedded-alloc = "0.6.0"
 bxcan = "0.6"
 
 [[bin]]

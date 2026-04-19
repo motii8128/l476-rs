@@ -146,7 +146,6 @@ fn main() -> ! {
                         write!(serial, "{} ", b).unwrap();
                     }
                     write!(serial, "\r\n").unwrap();
-                    // writeln!(serial, "{:?}\r\n",tx_buf).unwrap();
                     nb::block!(serial.flush()).unwrap();
                 }
             }
