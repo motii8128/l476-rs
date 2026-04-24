@@ -98,7 +98,6 @@ fn main() -> ! {
     asm::delay(5000000);
     internal_led.set_low();
     asm::delay(5000000);
-    internal_led.set_high();
 
     cortex_m::interrupt::free(|cs| {
         CAN.borrow(cs).replace(Some(can_));
@@ -106,14 +105,57 @@ fn main() -> ! {
 
     loop 
     {
-        
+        let mut read_buffer = [0_u8; 8];
+        let mut count = 0;
+        // シリアル通信で受信
+        loop {
+            match serial.read()
+            {
+                Ok(b)=>{
+                    if b == b'\n'
+                    {
+                        internal_led.set_high();
+                        break;
+                    }
+
+                    if count < 8
+                    {
+                        read_buffer[count] = b;
+                        count += 1;
+                    }
+                    else {
+                        internal_led.set_high();
+                        asm::delay(5000000);
+                        internal_led.set_low();
+                        asm::delay(5000000);
+
+                        count = 0;
+                    }
+                }
+                Err(_e) => {
+                }
+            }
+        }
+
+        let mut current = [0_i16; 6];
+
+        for i in 0..3
+        {
+            current[i] = to_current(read_buffer[i]);
+        }
+
+        // for i in 3..6
+        // {
+        //     current[i] = to_current(read_buffer[i]) * -1;
+        // }
 
         let mut data:[u8;8] = [0_u8;8];
-
-        let current : i16 = 0;
-
-        data[0] = ((current >> 8) & 0xFF) as u8;
-        data[1] = (current & 0xFF) as u8;
+        data[0] = ((current[0] >> 8) & 0xFF) as u8;
+        data[1] = (current[0] & 0xFF) as u8;
+        data[2] = ((current[1] >> 8) & 0xFF) as u8;
+        data[3] = (current[1] & 0xFF) as u8;
+        data[4] = ((current[2] >> 8) & 0xFF) as u8;
+        data[5] = (current[2] & 0xFF) as u8;
 
         let frame = bxcan::Frame::new_data(bxcan::Id::Standard(StandardId::new(0x200).unwrap()), data);
 
@@ -122,8 +164,6 @@ fn main() -> ! {
             {
                 if can.transmit(&frame).is_ok() 
                 {
-                    internal_led.toggle();
-
                     let mut encode_data = [0_i16; 9];
                     encode_data[0] = CAN_DATA.position[0].load(core::sync::atomic::Ordering::Relaxed);
                     encode_data[1] = CAN_DATA.velocity[0].load(core::sync::atomic::Ordering::Relaxed);
@@ -183,4 +223,8 @@ fn CAN1_RX0() {
             }
         }
     });
+}
+
+fn to_current(b: u8) -> i16 {
+    ((b as f32 - 128.0) / 127.0 * 10000.0) as i16
 }
